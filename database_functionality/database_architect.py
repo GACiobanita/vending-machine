@@ -49,6 +49,13 @@ class DatabaseArchitect(object):
         execution_string = 'INSERT INTO {} VALUES ('.format(table_name) + column_count[:-1] + ')'
         self.db_cursor.executemany(execution_string, (input_values,))
 
+    def update_table_data(self, table_name, column_name, id_column_name, id_column, new_value):
+        table_string_first_half = 'UPDATE {} SET {}=?'.format(table_name, column_name)
+        table_string_second_half = ' WHERE {}=?'.format(id_column_name)
+        execution_string = table_string_first_half+table_string_second_half
+        self.db_cursor.execute(execution_string, (new_value, id_column,))
+        self.commit_changes_to_database()
+
     def get_tables_from_database(self):
         result = self.db_cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
         for table_name in result:
@@ -83,21 +90,20 @@ class DatabaseArchitect(object):
         # in order to avoid rogue creation of databases
         # we want to control how databases are created through our code
         for csv_file_name in self.csv_files:
-            df = pd.read_csv(self.csv_file_path+"\\"+csv_file_name)
+            df = pd.read_csv(self.csv_file_path + "\\" + csv_file_name)
             df.to_sql(csv_file_name[:-4], self.db_connection, if_exists='append', index=False)
 
     def get_data_base_data(self):
-        df_list = []
+        df_list = {}
         for table in self.db_tables:
             df = pd.read_sql(sql='SELECT * FROM {}'.format(table), con=self.db_connection, index_col=None)
-            df_list.append((table, df))
+            df_list[table] = df
         return df_list
 
-
-    def data_base_to_csv(self, csv_file_path):
+    def data_base_to_csv(self):
         for table in self.db_tables:
             df = pd.read_sql(sql='SELECT * FROM {}'.format(table), con=self.db_connection)
-            df.to_csv(csv_file_path + str(table) + ".csv", index=False)
+            df.to_csv(self.csv_file_path+'\\' + str(table) + ".csv", index=False)
 
     def connect_to_database(self):
         if os.path.isfile(self.data_base_file_path) is True:

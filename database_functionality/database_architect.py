@@ -16,10 +16,8 @@ class DatabaseArchitect(object):
 
         project_file_path = os.path.dirname(os.path.dirname(module_file_path))
 
-        self.data_base_file_path = project_file_path + "\\database\\vendor_database.db"
+        self.data_base_file_path = project_file_path + "\\database\\"
         self.csv_file_path = project_file_path + "\\csv_files"
-
-        self.connect_to_database()
 
     def create_db_connection(self):
         # create a database_functionality connection to a SQLite database_functionality
@@ -49,11 +47,11 @@ class DatabaseArchitect(object):
         execution_string = 'INSERT INTO {} VALUES ('.format(table_name) + column_count[:-1] + ')'
         self.db_cursor.executemany(execution_string, (input_values,))
 
-    def update_table_data(self, table_name, column_name, id_column_name, id_column, new_value):
+    def update_table_data(self, table_name, column_name, id_column_name, data_id, new_value):
         table_string_first_half = 'UPDATE {} SET {}=?'.format(table_name, column_name)
         table_string_second_half = ' WHERE {}=?'.format(id_column_name)
         execution_string = table_string_first_half+table_string_second_half
-        self.db_cursor.execute(execution_string, (new_value, id_column,))
+        self.db_cursor.execute(execution_string, (new_value, data_id,))
         self.commit_changes_to_database()
 
     def get_tables_from_database(self):
@@ -105,7 +103,8 @@ class DatabaseArchitect(object):
             df = pd.read_sql(sql='SELECT * FROM {}'.format(table), con=self.db_connection)
             df.to_csv(self.csv_file_path+'\\' + str(table) + ".csv", index=False)
 
-    def connect_to_database(self):
+    def connect_to_database(self, database_name):
+        self.data_base_file_path = self.data_base_file_path+database_name
         if os.path.isfile(self.data_base_file_path) is True:
             self.create_db_connection()
             self.create_db_cursor()

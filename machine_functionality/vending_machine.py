@@ -2,26 +2,32 @@ from mediator_functionality.mediator import Mediator
 import re
 
 REGEX = re.compile('[a-zA-Z@_!#$%^&*()<>?/\\\\|}{~:]')
+EXAMPLE_STRING = '[£2 £1 50p 20p 10p 5p 2p 1p]'
+
 
 class VendorItem(object):
     def __init__(self, item_name, item_display_price, item_int_price, items_available):
-        self.item_name = item_name
-        self.items_available = items_available
-        self.item_display_price = item_display_price
-        self.item_int_price = item_int_price
+        self.item_name = str(item_name)
+        self.items_available = int(items_available)
+        self.item_display_price = str(item_display_price)
+        self.item_int_price = int(item_int_price)
 
     def __str__(self):
         return str(self.item_name) + " available for: " + str(self.item_display_price) + ".\n"
 
 
+# each CurrencyCount item is equal to a single coin value
 class CurrencyCount(object):
     def __init__(self, currency_name, currency_int_value, currency_available):
-        self.currency_name = currency_name
-        self.currency_available = currency_available
-        self.currency_int_value = currency_int_value
+        self.currency_name = str(currency_name)
+        self.currency_available = int(currency_available)
+        self.currency_int_value = int(currency_int_value)
 
     def __str__(self):
-        return str(self.currency_available) + ' coins of ' + str(self.currency_name) + ' value available.\n'
+        return str(self.currency_available) + ' coins of ' + self.currency_name + ' value available.\n'
+
+    def get_sum_of_coins(self):
+        return self.currency_available * self.currency_int_value
 
 
 class VendingMachine(object):
@@ -44,11 +50,19 @@ class VendingMachine(object):
         available_change = {}
         change_to_give = {}
         change_inserted = {}
-        for currency_name, (amount_available, int_value) in self.funds_information.items():
+        for currency_name, (amount_available, int_value) in sorted(list(self.funds_information.items()),
+                                                                   key=lambda x: x[1][1],
+                                                                   reverse=True):
             available_change[currency_name] = CurrencyCount(currency_name, int_value, amount_available)
             change_to_give[currency_name] = CurrencyCount(currency_name, int_value, 0)
             change_inserted[currency_name] = CurrencyCount(currency_name, int_value, 0)
         return available_change, change_to_give, change_inserted
+
+    def reset_inserted_change(self):
+        for currency_name, (amount_available, int_value) in sorted(list(self.funds_information.items()),
+                                                                   key=lambda x: x[1][1],
+                                                                   reverse=True):
+            self.change_inserted[currency_name] = CurrencyCount(currency_name, int_value, 0)
 
     def display_available_items(self):
         for select_option, item in self.items_list.items():
@@ -88,10 +102,7 @@ class VendingMachine(object):
         return selected_item_value * quantity
 
     def calculate_change_amount(self, payment_amount):
-        # go from the largest amount of currency to the smallest amount of currency 2 GBP to 1 pence
-        for currency_name, currency_item in sorted(list(self.change_to_give_back.items()),
-                                                   key=lambda x: x[1].currency_int_value,
-                                                   reverse=True):
+        for currency_name, currency_item in self.change_to_give_back.items():
             # verify if there are any coins of this type to give as change
             available_coin_amount = self.available_change[currency_name].currency_available
             if available_coin_amount > 0:
@@ -103,31 +114,43 @@ class VendingMachine(object):
                 else:
                     # there are enough coins to reach the sum
                     self.change_to_give_back[currency_name].currency_available = number_of_coins
+                # reduce payment amount to calculate for the next type of coin
                 payment_amount -= currency_item.currency_int_value * self.change_to_give_back[
                     currency_name].currency_available
-            # reduce payment amount to calculate for the next type of coin
-        # if we reach this point then this means we don't have enough coins to give change back
         if payment_amount > 0:
+            # if we reach this point then this means we don't have enough coins to give change back
             print(' There is not enough change, money refunded.')
+            # remove the inserted coins that were used as available change
+            self.remove_inserted_currency_from_available_currency()
         else:
+            # we successfully created a list of coins to give back as change
             for currency_name, currency_item in self.available_change.items():
                 self.available_change[currency_name].currency_available -= self.change_to_give_back[
                     currency_name].currency_available
                 print(self.change_to_give_back[currency_name])
 
-    def insert_change(self, payment_amount):
-        example_string = '[£2 £1 50p 20p 10p 5p 2p 1p]'
+    def insert_change(self):
+        change_string = None
         print('You can insert the following coins in the machine.\n')
-        print(example_string + '\n')
-        print(
-            'Insert coins in the following way:[1 1 0 0 1 1 0 0], where each number represents the amount of coins of that type to be inserted.\n')
+        print(EXAMPLE_STRING + '\n')
+        print('Insert coins in the following way:[1 1 0 0 1 1 0 0].\n')
+        print('Each number represents the amount of coins of that type to be inserted.\n')
         print('The above would be equal to £3.15.')
-        print(example_string + '\n')
+        print(EXAMPLE_STRING + '\n')
         input_string = input('Now please input the amount you would like to insert\n')
-        string_list = self.input_string_verification(input_string)
+        change_list = self.input_string_verification(input_string)
+        return change_list
+
+    def verify_inserted_change(self, payment_amount, change_list):
         count = 0
         for currency_name, currency_item in self.change_inserted.items():
-            self.change_inserted[currency_name].currency_available = string_list[count]
+            self.change_inserted[currency_name].currency_available = int(change_list[count])
+            count += 1
+        change_sum = self.calculate_currency_sum(self.change_inserted)
+        if change_sum < payment_amount:
+            self.reset_inserted_change()
+            return False
+        return True
 
     # so we can use inserted coins to give change back
     def add_inserted_currency_to_available_currency(self):
@@ -142,6 +165,13 @@ class VendingMachine(object):
                 currency_name].currency_available
 
     @staticmethod
+    def calculate_currency_sum(currency_data):
+        currency_sum = 0
+        for currency_name, currency_item in currency_data.items():
+            currency_sum += currency_item.get_sum_of_coins()
+        return currency_sum
+
+    @staticmethod
     # verify if the string contains any letters of symbols
     # string also needs to follow the example, meaning it needs to have a length of 15 but also split into a
     # list of length 8
@@ -153,8 +183,5 @@ class VendingMachine(object):
             print('[£2 £1 50p 20p 10p 5p 2p 1p]\n')
             input_string = input('Now please input the amount you would like to insert.\n')
             string_list = input_string.split(' ')
-
-            print(len(input_string))
-            print(REGEX.search(input_string))
-            print(len(string_list))
+        string_list = [int(string_element) for string_element in string_list]
         return string_list

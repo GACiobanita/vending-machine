@@ -31,7 +31,7 @@ class Mediator(object):
         fund_data = {}
         for row in self.entire_data_base['machine_funds'].iterrows():
             int_value = self.transform_currency_to_int(row[1]['currency_name'])
-            fund_data[row[1]['currency_name']] = (row[1]['amount_available'], int_value)
+            fund_data[row[1]['currency_name']] = (int(row[1]['amount_available']), int_value)
         return fund_data
 
     def get_fund_data(self):

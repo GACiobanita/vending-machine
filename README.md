@@ -10,6 +10,7 @@ There should be a way of reloading either products or change at a later point.
 The machine should keep track of the products and change that it contains.
 
 ###Project Installation Instructions:
+
 For Windows 10:
 
 1.Download Python version 3.7.4. from https://www.python.org/downloads/, makes sure you have the following modules installed: pandas, os, inspect, sqlite3, re, unittest.
@@ -17,6 +18,7 @@ For Windows 10:
 3. In the Command Prompt, inside the project folder, run the following line: python -m .main Example: C:\Users\Alex\Python\vending-machine-1.0>python -m main
 
 ###Description:
+
 The project is separated into 3 main parts:
 1. The database, database_architect.py.
 2. The Mediator, mediator.py.

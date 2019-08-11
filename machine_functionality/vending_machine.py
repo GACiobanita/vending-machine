@@ -4,6 +4,7 @@ import re
 REGEX = re.compile('[a-zA-Z@_!#$%^&*()<>?/\\\\|}{~:]')
 EXAMPLE_STRING = '[£2 £1 50p 20p 10p 5p 2p 1p]'
 
+
 # a container for the database data taken from the mediator
 class VendorItem(object):
     def __init__(self, item_name, item_display_price, item_int_price, items_available):

@@ -5,17 +5,18 @@ Design a vending machine using Python. The vending machine should perform as fol
 
 Once an item is selected and the appropriate amount of money is inserted, the vending machine should return the correct product.
 It should also return change if too much money is provided, or ask for more money if insufficient funds have been inserted.
-The machine should take an initial load of products and change. The change will be of denominations 1p, 2p, 5p, 10p, 20p, 50p, £1, £2.
+The machine should take an initial load of products and change. The change will be of denominations 1p, 2p, 5p, 10p, 20p, 50p, Â£1, Â£2.
 There should be a way of reloading either products or change at a later point.
 The machine should keep track of the products and change that it contains.
 
-###Project Installation Instructions:###
+###Project Installation Instructions:
 For Windows 10:
+
 1.Download Python version 3.7.4. from https://www.python.org/downloads/, makes sure you have the following modules installed: pandas, os, inspect, sqlite3, re, unittest.
 2. Download vending-machine-1.0.tar.gz and extract the contents where you see fit.
 3. In the Command Prompt, inside the project folder, run the following line: python -m .main Example: C:\Users\Alex\Python\vending-machine-1.0>python -m main
 
-###Description:###
+###Description:
 The project is separated into 3 main parts:
 1. The database, database_architect.py.
 2. The Mediator, mediator.py.
@@ -26,16 +27,16 @@ The data base is filled with tables that contain data from .csv files using pand
 The .csv files are in the following format:
 item_list.csv			       || machine_funds.csv
 item_id,item_name,item_cost,item_amount||currency_id,currency_name,amount_available
-1,Green Tea,£0.79,8		       ||1,1p,10
-2,Peach Tea,£0.79,10		       ||2,2p,9
-3,Coke Can,£0.89,10		       ||5,5p,10
-4,Fanta Can,£0.89,10		       ||10,10p,10
-5,Sprite Can,£0.89,10		       ||20,20p,8
-6,Secret Surprise,£200.00,1	       ||50,50p,10
-7,Pizza,£24.99,5		       ||100,£1,10
-8,1/2 Pizza,£15.99,10		       ||200,£2,10
-9,1/4 Pizza,£8.99,20		       ||
-10,Sandwich,£5.99,5		       ||
+1,Green Tea,Â£0.79,8		       ||1,1p,10
+2,Peach Tea,Â£0.79,10		       ||2,2p,9
+3,Coke Can,Â£0.89,10		       ||5,5p,10
+4,Fanta Can,Â£0.89,10		       ||10,10p,10
+5,Sprite Can,Â£0.89,10		       ||20,20p,8
+6,Secret Surprise,Â£200.00,1	       ||50,50p,10
+7,Pizza,Â£24.99,5		       ||100,Â£1,10
+8,1/2 Pizza,Â£15.99,10		       ||200,Â£2,10
+9,1/4 Pizza,Â£8.99,20		       ||
+10,Sandwich,Â£5.99,5		       ||
 
 item_list table and machine_funds table are created using these files. If you want to change these files to create new data base data the column names need to stay the same, but row data can be changed with less constraints(e.g. maybe you wish to use different item id's or currency amounts)
 If you wish to add your own data, you need to delete the data base manually, and replace the data in the "csv_files" folder for it to appear in the new database.

@@ -96,3 +96,9 @@ class MediatorTest(unittest.TestCase):
         self.mediator.get_data_from_data_base()
         self.mediator.update_data_base('', '', {'': None})
         self.mediator.data_base_architect.data_base_to_csv()
+
+    def test_request_data_base_reset(self):
+        self.mediator.request_data_base_reset()
+        self.assertNotEqual(None, self.mediator.data_base_architect)
+        self.assertNotEqual(0, len(self.mediator.item_data))
+        self.assertNotEqual(0, len(self.mediator.fund_data))

@@ -18,12 +18,12 @@ class DatabaseArchitect(object):
 
         self.data_base_file_path = project_file_path + "\\database\\"
         self.csv_file_path = project_file_path + "\\csv_files"
+        self.backup_csv_file_path = project_file_path + "\\backup_csv_files"
 
     def create_db_connection(self):
         # create a database_functionality connection to a SQLite database_functionality
         try:
             self.db_connection = sqlite3.connect(self.data_base_file_path)
-            print(sqlite3.version)
         except Exception as e:
             print(e)
 
@@ -50,7 +50,7 @@ class DatabaseArchitect(object):
     def update_table_data(self, table_name, column_name, id_column_name, data_id, new_value):
         table_string_first_half = 'UPDATE {} SET {}=?'.format(table_name, column_name)
         table_string_second_half = ' WHERE {}=?'.format(id_column_name)
-        execution_string = table_string_first_half+table_string_second_half
+        execution_string = table_string_first_half + table_string_second_half
         self.db_cursor.execute(execution_string, (new_value, data_id,))
         self.commit_changes_to_database()
 
@@ -78,8 +78,8 @@ class DatabaseArchitect(object):
     def create_new_database(self):
         self.create_db_connection()
 
-    def get_csv_files_from_path(self):
-        file_names = os.listdir(self.csv_file_path)
+    def get_csv_files_from_path(self, csv_file_path):
+        file_names = os.listdir(csv_file_path)
         for file_name in file_names:
             if file_name.endswith(".csv"):
                 self.csv_files.append(file_name)
@@ -101,10 +101,10 @@ class DatabaseArchitect(object):
     def data_base_to_csv(self):
         for table in self.db_tables:
             df = pd.read_sql(sql='SELECT * FROM {}'.format(table), con=self.db_connection)
-            df.to_csv(self.csv_file_path+'\\' + str(table) + ".csv", index=False)
+            df.to_csv(self.csv_file_path + '\\' + str(table) + ".csv", index=False)
 
     def connect_to_database(self, database_name):
-        self.data_base_file_path = self.data_base_file_path+database_name
+        self.data_base_file_path = self.data_base_file_path + database_name
         if os.path.isfile(self.data_base_file_path) is True:
             self.create_db_connection()
             self.create_db_cursor()
@@ -114,8 +114,23 @@ class DatabaseArchitect(object):
             print("Data base does not exist, creating new data base.\n")
             self.create_new_database()
             print("Data base created, uploading data from csv file.\n")
-            self.get_csv_files_from_path()
+            self.get_csv_files_from_path(self.csv_file_path)
             self.csv_to_database_table()
             print("New database created.\n")
             self.create_db_cursor()
             self.get_tables_from_database()
+
+    def reset_data_base(self):
+        for table_name in self.db_tables:
+            execution_string = 'DROP TABLE {}'.format(table_name)
+            self.db_cursor.execute(execution_string)
+        self.db_tables = []
+        self.csv_files = []
+        print("Creating new data base from the csv files in backup.\n")
+        self.create_new_database()
+        print("Data base created, uploading data from csv file.\n")
+        self.get_csv_files_from_path(self.backup_csv_file_path)
+        self.csv_to_database_table()
+        print("New database created from backup files.\n")
+        self.create_db_cursor()
+        self.get_tables_from_database()

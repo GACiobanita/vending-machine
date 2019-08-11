@@ -36,13 +36,13 @@ class TestDatabaseFunctionality(unittest.TestCase):
         self.database_architect.close_db()
 
     def test_get_csv_files_from_path(self):
-        self.database_architect.get_csv_files_from_path()
+        self.database_architect.get_csv_files_from_path(self.database_architect.csv_file_path)
         self.assertNotEqual(0, len(self.database_architect.csv_files))
 
     # no csv files in path
     def test_get_csv_files_from_path(self):
         self.database_architect.csv_file_path = "D:\\"
-        self.database_architect.get_csv_files_from_path()
+        self.database_architect.get_csv_files_from_path(self.database_architect.csv_file_path)
         self.assertNotEqual(0, len(self.database_architect.csv_files))
 
     def test_csv_to_database_table_valid(self):
@@ -137,6 +137,12 @@ class TestDatabaseFunctionality(unittest.TestCase):
         self.database_architect.create_db_connection()
         result = self.database_architect.get_data_base_data()
         self.assertNotEqual({}, result)
+
+    def test_reset_data_base(self):
+        self.database_architect.connect_to_database('vendor_data_base.db')
+        self.database_architect.reset_data_base()
+        self.assertNotEqual(0, len(self.database_architect.csv_files))
+        self.assertNotEqual(0, len(self.database_architect.db_tables))
 
 
 if __name__ == "__main__":

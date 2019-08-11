@@ -100,6 +100,22 @@ class VendingMachineTest(unittest.TestCase):
         changed_currency = self.vending_machine.available_change['£2']
         self.assertEqual(9, changed_currency.currency_available)
 
+    def test_close_db(self):
+        self.vending_machine.close_vending_machine()
+
+    def test_item_purchase_process(self):
+        self.vending_machine.item_purchase_process()
+
+    def test_request_mediator_to_reset_data_base(self):
+        self.vending_machine.request_mediator_to_reset_data_base()
+        self.assertNotEqual(0, len(self.vending_machine.funds_information))
+        self.assertNotEqual(0, len(self.vending_machine.items_information))
+        self.assertNotEqual(0, len(self.vending_machine.items_list))
+        self.assertNotEqual(0, len(self.vending_machine.available_change))
+        self.assertNotEqual(0, len(self.vending_machine.change_inserted))
+        self.assertNotEqual(0, len(self.vending_machine.change_to_give_back))
+
+
 if __name__ == "__main__":
     unittest.main()
     print("Everything passed")

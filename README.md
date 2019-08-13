@@ -27,6 +27,8 @@ The project is separated into 3 main parts:
 1. The data base is implemented using sqlite3. It creates a .db file in the "database" folder of the project. It connects to an existing data base or it creates a data base at run time if a data base of name "vendor_data_base.db" is not present.
 The data base is filled with tables that contain data from .csv files using pandas. These .csv files are item_list.csv and machine_funds.csv
 The .csv files are in the following format:
+
+
 item_list.csv			       || machine_funds.csv
 item_id,item_name,item_cost,item_amount||currency_id,currency_name,amount_available
 1,Green Tea,£0.79,8		       ||1,1p,10
@@ -39,6 +41,8 @@ item_id,item_name,item_cost,item_amount||currency_id,currency_name,amount_availa
 8,1/2 Pizza,£15.99,10		       ||200,£2,10
 9,1/4 Pizza,£8.99,20		       ||
 10,Sandwich,£5.99,5		       ||
+
+
 
 item_list table and machine_funds table are created using these files. If you want to change these files to create new data base data the column names need to stay the same, but row data can be changed with less constraints(e.g. maybe you wish to use different item id's or currency amounts)
 If you wish to add your own data, you need to delete the data base manually, and replace the data in the "csv_files" folder for it to appear in the new database.
